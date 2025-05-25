@@ -1,4 +1,6 @@
+#include <vector>
 #include <string>
+#include <fstream>
 #include "chip8.h"
 #include "chip8_font.h"
 
@@ -14,9 +16,36 @@ Chip8::Chip8()
 	}
 }
 
-void Chip8::load(std::string filename)
+bool Chip8::load(std::string filename)
 {
-	
+	std::ifstream file(filename, std::ios::binary);
+
+	if (!file.is_open())
+	{
+		return false;
+	}
+
+	file.seekg(0, std::ios::end);
+	std::streamsize size = file.tellg();
+
+	if (size <= 0)
+	{
+		return false;
+	}
+
+	std::vector<unsigned char> buffer(size);
+
+	if(!file.read(reinterpret_cast<char*>(buffer.data()), size))
+	{
+		return false;
+	}
+
+	for (int i = 0; i < size; i++)
+	{
+		memory[i + 512] = buffer[i];
+	}
+
+	return true;
 }
 
 void Chip8::emulate_one_cycle()

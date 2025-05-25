@@ -1,16 +1,21 @@
 #pragma once
-#define CHIP8_H
 #include <string>
+
+const int MEMORY_SIZE   = 4  * 1024;
+const int DISPLAY_SIZE  = 64 * 32;
+const int REGISTERS     = 16;
+const int STACK_SIZE    = 16;
+const int KEYS          = 16;
 
 struct Chip8
 {
 	// chip8 has 4k of memory (0xFFF)
-	unsigned char memory[4 * 1024];
+	unsigned char memory[MEMORY_SIZE];
 
 
 	// total 16 register, each 8 bits
 	// (vx) V0 ... VF, 16th register used as a carry flag
-	unsigned char v[16];
+	unsigned char v[REGISTERS];
 
 	// memory address register (index register), 0x0 ... 0xFFF
 	unsigned short i;
@@ -31,21 +36,21 @@ struct Chip8
 	unsigned short opcode;
 
 	// windows size 64 * 32 => 2048
-	unsigned char display[64 * 32];
+	unsigned char display[DISPLAY_SIZE];
 
 
 	// system call stack
 	// 16 level - each 16 bit
-	unsigned short stack[16];
+	unsigned short stack[STACK_SIZE];
 	unsigned short sp;
 
 	// keyboard - 0x0 ... 0xF
-	unsigned char key_state[16];
+	unsigned char key_state[KEYS];
 
 
 	Chip8();
 
-	void load(std::string file_name);
+	bool load(std::string file_name);
 
 	void emulate_one_cycle();
 
