@@ -10,6 +10,7 @@ Chip8::Chip8()
 	// game program starts at 0x200
 	pc = 0x200;
 
+	// keyboard configuration
 	for (int i = 0; i < 80; i++)
 	{
 		memory[i] = chip8_fontset[i];
@@ -40,6 +41,7 @@ bool Chip8::load(std::string filename)
 		return false;
 	}
 
+	// game starts at memory 0x200
 	for (int i = 0; i < size; i++)
 	{
 		memory[i + 512] = buffer[i];
