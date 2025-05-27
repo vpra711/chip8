@@ -1,0 +1,47 @@
+{
+    "tasks": [
+        {
+            "type": "cmake",
+            "label": "project_config",
+            "command": "configure",
+            "preset": "default",
+            "targets": [
+                "Core",
+                "Debug"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "group": "build",
+            "detail": "cmake configuration"
+        },
+        {
+            "type": "cmake",
+            "label": "project_build",
+            "command": "build",
+            "dependsOn":[
+                "project_clean",
+                "project_config"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "isDefault": true,
+                "kind": "build"
+            },
+            "detail": "cmake build"
+        },
+        {
+            "label": "project_clean",
+            "type": "cmake",
+            "command": "clean",
+            "group": "build",
+            "detail": "Removes all build artifacts"
+        }
+    ],
+    "version": "2.0.0"
+}

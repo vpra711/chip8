@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <sstream>
 
 const int MEMORY_SIZE   = 4  * 1024;
 const int DISPLAY_SIZE  = 64 * 32;
@@ -50,11 +51,13 @@ struct Chip8
 
 	Chip8();
 
-	bool load(std::string file_name);
+	int load(std::string file_name);
 
 	void emulate_one_cycle();
 
 	void check_keys();
 
 	void reset();
+
+	std::ostringstream get_memory_as_str_stream();
 };

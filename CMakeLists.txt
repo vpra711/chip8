@@ -15,9 +15,9 @@ find_package(glfw3 CONFIG REQUIRED)
 # Add the executable and its sources
 add_executable(
     chip8_emulator
-    main.cpp
-    chip8.cpp
     chip8.h
+    chip8.cpp
+    main.cpp
 )
 
 # Link glfw
