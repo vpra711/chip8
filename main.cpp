@@ -17,14 +17,20 @@ const char* TITLE 			= "chip8 emulator";
 int main(int argc, char *argv[])
 {
 	time_t time_stamp = time(NULL);
-	
+	int error_code = 0, key = 0;
+	char charactor = 0;
+	std::ostringstream oss;
+
+	InitWindow(DISPLAY_WIDTH, DISPLAY_HEIGHT, TITLE);
+	SetTargetFPS(60);
+
 	if (argc != 2)
 	{
 		std::cout << "invalid argument";
 		return 0;
 	}
 
-	int error_code = chip8.load(std::string(argv[1]));
+	error_code = chip8.load(std::string(argv[1]));
 
 	if(error_code)
 	{
@@ -32,27 +38,26 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	// InitWindow(DISPLAY_WIDTH, DISPLAY_HEIGHT, TITLE);
-	// SetTargetFPS(60);
-	
-	// while(!WindowShouldClose())
-	// {
-	// 	int key = GetKeyPressed();
-	// 	char charactor = GetCharPressed();
+	while (!WindowShouldClose())
+	{
+		key = GetKeyPressed();
+		charactor = GetCharPressed();
 
-	// 	if (key != 0 && charactor != 0)
-	// 	{
-	// 		chip8.emulate_one_cycle();
-	// 		std::ostringstream oss;
-	// 		oss << "key is: " << key << ", char is: " << charactor;
-	// 		BeginDrawing();
-	// 		ClearBackground(BLACK);
-	// 		DrawText(oss.str().c_str(), 50, 50, 20, WHITE);
-	// 		EndDrawing();
-	// 	}
-	// }
+		if (key != 0 || charactor != 0)
+		{
+			chip8.emulate_one_cycle();
+			oss.clear();
+			oss.str("");
+			oss << "key is: " << key << ", char is: " << charactor;
+		}
 
-	// CloseWindow();	
+		BeginDrawing();
+		ClearBackground(BLACK);
+		DrawText(oss.str().c_str(), 50, 50, 20, WHITE);
+		EndDrawing();
+	}
+
+	CloseWindow();
 	return 0;
 }
 
