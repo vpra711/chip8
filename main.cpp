@@ -6,6 +6,7 @@
 #include <string>
 
 void handle_error_code(int error_code);
+void update_key_state();
 
 Chip8 chip8;
 
@@ -13,6 +14,13 @@ const int 	DISPLAY_WIDTH  	= 640;
 const int 	DISPLAY_HEIGHT 	= 320;
 const int 	PIXAL_SIZE 		= 10;
 const char* TITLE 			= "chip8 emulator";
+
+const int INPUT_KEYS[16] = {
+	KEY_ONE, 	KEY_TWO, 	KEY_THREE, 	KEY_FOUR,
+	KEY_Q, 		KEY_W, 		KEY_E, 		KEY_R,
+	KEY_A, 		KEY_S, 		KEY_D, 		KEY_F,
+	KEY_Z, 		KEY_X, 		KEY_C, 		KEY_V
+};
 
 int main(int argc, char *argv[])
 {
@@ -40,8 +48,7 @@ int main(int argc, char *argv[])
 
 	while (!WindowShouldClose())
 	{
-		key = GetKeyPressed();
-		charactor = GetCharPressed();
+		update_key_state();
 
 		if (key != 0 || charactor != 0)
 		{
@@ -50,7 +57,9 @@ int main(int argc, char *argv[])
 			oss.str("");
 			oss << "key is: " << key << ", char is: " << charactor;
 		}
-
+		
+		// we have to update the screen at 60hz, since system expects atleast 60 frames per second
+		// we set target_fps as 60, have to deliver the 60 frames
 		BeginDrawing();
 		ClearBackground(BLACK);
 		DrawText(oss.str().c_str(), 50, 50, 20, WHITE);
@@ -59,6 +68,14 @@ int main(int argc, char *argv[])
 
 	CloseWindow();
 	return 0;
+}
+
+void update_key_state()
+{
+	for (int i = 0; i < KEYS; i++)
+	{
+		chip8.key_state[i] = IsKeyDown(INPUT_KEYS[i]);
+	}
 }
 
 void handle_error_code(int error_code)

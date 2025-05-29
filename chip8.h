@@ -59,5 +59,7 @@ struct Chip8
 
 	void reset();
 
+	void clear_display();
+
 	std::ostringstream get_memory_as_str_stream();
 };

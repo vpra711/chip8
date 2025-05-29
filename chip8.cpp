@@ -64,7 +64,63 @@ int Chip8::load(std::string filename)
 
 void Chip8::emulate_one_cycle()
 {
-	
+	short op_code = (memory[pc] << 8) | memory[pc + 1];
+	int first_nibble_filter = op_code & 0xF000;
+	int first_last_nibble_filter = op_code & 0xF00F;
+	int first_last_2_filter = op_code & 0xF0FF;
+
+	switch (first_nibble_filter)
+	{
+		case 0x1000: break;
+		case 0x2000: break;
+		case 0x3000: break;
+		case 0x4000: break;
+		case 0x5000: break;
+		case 0x6000: break;
+		case 0x7000: break;
+		case 0x8000: break;
+		case 0x9000: break;
+		case 0xA000: break;
+		case 0xB000: break;
+		case 0xC000: break;
+		case 0xD000: break;
+	}
+
+	switch (first_last_nibble_filter) 
+	{
+		case 0x8001: break;
+		case 0x8002: break;
+		case 0x8003: break;
+		case 0x8004: break;
+		case 0x8005: break;
+		case 0x8006: break;
+		case 0x8007: break;
+		case 0x800E: break;
+	}
+
+	switch (first_last_2_filter)
+	{
+		case 0xE09E: break;
+		case 0xE0A1: break;
+		case 0xF007: break;
+		case 0xF00A: break;
+		case 0xF015: break;
+		case 0xF018: break;
+		case 0xF01E: break;
+		case 0xF029: break;
+		case 0xF033: break;
+		case 0xF055: break;
+		case 0xF065: break;
+	}
+
+	if (op_code == 0x00E0)
+	{
+		// clear screen
+	} 
+	else if (op_code == 0x00E0)
+	{
+		// return from subroutine
+	}
 }
 
 void Chip8::reset()
@@ -91,6 +147,14 @@ void Chip8::reset()
 void Chip8::check_keys()
 {
 	
+}
+
+void Chip8::clear_display()
+{
+	for (int i = 0; i < DISPLAY_SIZE; i++)
+	{
+		display[i] = 0;
+	}
 }
 
 std::ostringstream Chip8::get_memory_as_str_stream()
