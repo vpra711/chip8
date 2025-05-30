@@ -1,70 +1,48 @@
 #include <vector>
-#include <fstream>
 #include "chip8.h"
-#include "chip8_font.h"
 
 Chip8::Chip8()
 {
 	// initializaiton of chip-8
-	// game program starts at 0x200
+	// game program starts at 0x200 (512)
 	pc = 0x200;
 
 	// keyboard configuration
-	for (int i = 0; i < 80; i++)
-	{
-		memory[i] = chip8_fontset[i];
-	}
+	memcpy(memory, chip8_fontset, FONTSET_SIZE);
 }
 
-int Chip8::load(std::string filename)
+void Chip8::load(std::vector<byte> buffer)
 {
-	std::ifstream file(filename, std::ios::binary | std::ios::ate);
+	// game starts at memory 0x200 (512 in memory)
+	std::copy(buffer.begin(), buffer.end(), memory + 0x200);
+}
 
-	if (!file.is_open())
-	{
-		return 1;
-	}
+void Chip8::reset()
+{
+	i           = 0;
+	sp          = 0;
+	opcode      = 0;
+	delay_timer = 0;
+	sound_timer = 0;
+	pc          = 0x200;
+	
+	memset(memory,    0, MEMORY_SIZE );
+	memset(stack,     0, STACK_SIZE  );
+	memset(v,         0, REGISTERS   );
+	memset(display,   0, DISPLAY_SIZE);
+	memset(key_state, 0, KEYS        );
 
-	std::streamsize size = file.tellg();
-	file.seekg(0, std::ios::beg);
+	memcpy(memory, chip8_fontset, FONTSET_SIZE);
+}
 
-	if (size <= 0)
-	{
-		return 2;
-	}
-
-	std::vector<char> buffer(size);
-
-	if (!file.read(&buffer[0], size))
-	{
-		if(file.eof())
-		{
-			return 4;
-		}
-		else if (file.bad())
-		{
-			return 5;
-		}
-		else if (file.fail())
-		{
-			return 6;
-		}
-		return 3;
-	}
-
-	// game starts at memory 0x200
-	for (int i = 0; i < size; i++)
-	{
-		memory[i + 512] = buffer[i];
-	}
-
-	file.close();
-	return 0;
+void Chip8::clear_display()
+{
+	memset(display, 0, DISPLAY_SIZE);
 }
 
 void Chip8::emulate_one_cycle()
 {
-	short op_code = (memory[pc] << 8) | memory[pc + 1];
+	word op_code = (memory[pc] << 8) | memory[pc + 1];
 	int first_nibble_filter = op_code & 0xF000;
 	int first_last_nibble_filter = op_code & 0xF00F;
 	int first_last_2_filter = op_code & 0xF0FF;
@@ -115,62 +93,12 @@ void Chip8::emulate_one_cycle()
 
 	if (op_code == 0x00E0)
 	{
-		// clear screen
+		clear_display();
 	} 
 	else if (op_code == 0x00E0)
 	{
 		// return from subroutine
+		pc = stack[sp];
+		sp--;
 	}
-}
-
-void Chip8::reset()
-{
-	i           = 0;
-	sp          = 0;
-	opcode      = 0;
-	delay_timer = 0;
-	sound_timer = 0;
-	pc          = 0x200;
-	
-	memset(memory,    0, MEMORY_SIZE );
-	memset(stack,     0, STACK_SIZE  );
-	memset(v,         0, REGISTERS   );
-	memset(display,   0, DISPLAY_SIZE);
-	memset(key_state, 0, KEYS        );
-	
-	for (int i = 0; i < 80; i++)
-	{
-		memory[i] = chip8_fontset[i];
-	}
-}
-
-void Chip8::check_keys()
-{
-	
-}
-
-void Chip8::clear_display()
-{
-	for (int i = 0; i < DISPLAY_SIZE; i++)
-	{
-		display[i] = 0;
-	}
-}
-
-std::ostringstream Chip8::get_memory_as_str_stream()
-{
-	std::ostringstream output_buffer;
-	output_buffer << "\n";
-
-	for (int i = 0; i < MEMORY_SIZE; i++)
-	{
-		if (i % 8 == 0) 
-		{
-			output_buffer << "\n";
-		}
-
-		output_buffer << memory[i] << "\t";
-	}
-
-	return output_buffer;
 }

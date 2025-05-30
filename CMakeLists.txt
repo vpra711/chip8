@@ -17,6 +17,8 @@ add_executable(
     chip8_emulator
     chip8.h
     chip8.cpp
+    game.h
+    game.cpp
     main.cpp
 )
 

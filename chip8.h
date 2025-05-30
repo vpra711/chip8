@@ -1,65 +1,89 @@
 #pragma once
-#include <string>
-#include <sstream>
 
-const int MEMORY_SIZE   = 4  * 1024;
-const int DISPLAY_SIZE  = 64 * 32;
-const int REGISTERS     = 16;
-const int STACK_SIZE    = 16;
-const int KEYS          = 16;
+typedef unsigned char byte;
+typedef unsigned short word;
+
+constexpr int MEMORY_SIZE 	= 4 * 1024;
+constexpr int DISPLAY_SIZE 	= 64 * 32;
+constexpr int FONTSET_SIZE 	= 80;
+constexpr int STACK_SIZE 	= 16;
+constexpr int REGISTERS 	= 16;
+constexpr int KEYS 			= 16;
+
+constexpr byte chip8_fontset[FONTSET_SIZE] =
+{
+	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+	0x20, 0x60, 0x20, 0x20, 0x70, // 1
+	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+	0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+	0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+	0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+	0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+	0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+	0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+	0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+	0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+	0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+	0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+	0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+	0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};
 
 struct Chip8
 {
+	private:
 	// chip8 has 4k of memory (0xFFF)
-	unsigned char memory[MEMORY_SIZE];
+	byte memory[MEMORY_SIZE];
 
 
 	// total 16 register, each 8 bits
 	// (vx) V0 ... VF, 16th register used as a carry flag
-	unsigned char v[REGISTERS];
+	byte v[REGISTERS];
 
 	// memory address register (index register), 0x0 ... 0xFFF
-	unsigned short i;
+	word i;
 	
 	// program counter, 0x0 ... 0xFFF
-	unsigned short pc;
+	word pc;
 
 
 	// 2 special purpose registers - delay and sound timers	
 	// delay timer 8 bit
-	unsigned char delay_timer;
+	byte delay_timer;
 
 	// sound timer 8 bit
-	unsigned char sound_timer;
+	byte sound_timer;
 
 
 	// opcode, 2 bytes
-	unsigned short opcode;
-
-	// windows size 64 * 32 => 2048
-	unsigned char display[DISPLAY_SIZE];
-
+	word opcode;
 
 	// system call stack
 	// 16 level - each 16 bit
-	unsigned short stack[STACK_SIZE];
-	unsigned short sp;
+	word stack[STACK_SIZE];
+	word sp;
+
+
+	public:
+	// windows size 64 * 32 => 2048
+	byte display[DISPLAY_SIZE];
 
 	// keyboard - 0x0 ... 0xF
-	unsigned char key_state[KEYS];
+	byte key_state[KEYS];
 
 
+	private:
+	void clear_display();
+
+	public:
 	Chip8();
 
-	int load(std::string file_name);
+	void load(std::vector<byte> buffer);
 
 	void emulate_one_cycle();
 
 	void check_keys();
 
 	void reset();
-
-	void clear_display();
-
-	std::ostringstream get_memory_as_str_stream();
 };
