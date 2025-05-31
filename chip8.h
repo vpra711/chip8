@@ -75,6 +75,10 @@ struct Chip8
 
 	private:
 	void clear_display();
+	void zero_series(word opcode);
+	void eight_series(word opcode);
+	void e_series(word opcode);
+	void f_series(word opcode);
 
 	public:
 	Chip8();

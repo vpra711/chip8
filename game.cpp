@@ -79,9 +79,6 @@ std::vector<byte> load_file_into_buffer(char *filename)
 
 void update_key_state()
 {
-	key = GetKeyPressed();
-	charactor = GetCharPressed();
-
 	// updating chip8's key status from the mapped keys
 	for (int i = 0; i < KEYS; i++)
 	{
