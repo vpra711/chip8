@@ -185,7 +185,9 @@ void Chip8::f_series()
 		case 0xF007:
 			v[opcode.x] = delay_timer;
 			break;
-		case 0xF00A: break;
+		case 0xF00A:
+			waiting_for_key_press = true;
+			break;
 		case 0xF015:
 			delay_timer = v[opcode.x];
 			break;
@@ -195,8 +197,14 @@ void Chip8::f_series()
 		case 0xF01E:
 			i += v[opcode.x];
 			break;
-		case 0xF029: break;
-		case 0xF033: break;
+		case 0xF029:
+			i = v[opcode.x] * 5;
+			break;
+		case 0xF033:
+			memory[i] = v[opcode.x] / 100;
+			memory[i + 1] = (v[opcode.x] / 10) % 10;
+			memory[i + 2] = v[opcode.x] % 10;
+			break;
 		case 0xF055:
 			memcpy(memory + i, v, opcode.x);
 			break;
@@ -204,6 +212,12 @@ void Chip8::f_series()
 			memcpy(v, memory + i, opcode.x);
 			break;
 	}
+}
+
+void Chip8::set_key(byte key)
+{
+	v[opcode.x] = key;
+	waiting_for_key_press = false;
 }
 
 Opcode::Opcode()

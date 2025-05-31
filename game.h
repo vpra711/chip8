@@ -27,5 +27,7 @@ void close();
 // helper functions
 std::vector<byte> load_file_into_buffer(char *filename);
 void update_key_state();
+void update_execution();
+void update_display();
 std::ostringstream get_memory_as_str_stream();
 void handle_error_code(int error_code);

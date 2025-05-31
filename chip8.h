@@ -77,13 +77,15 @@ struct Chip8
 	word stack[STACK_SIZE];
 	word sp;
 
-
+	
 	public:
 	// windows size 64 * 32 => 2048
 	byte display[DISPLAY_SIZE];
-
+	
 	// keyboard - 0x0 ... 0xF
 	byte key_state[KEYS];
+	
+	bool waiting_for_key_press;
 
 
 	private:
@@ -101,6 +103,8 @@ struct Chip8
 	void emulate_one_cycle();
 
 	void check_keys();
+
+	void set_key(byte key);
 
 	void reset();
 };

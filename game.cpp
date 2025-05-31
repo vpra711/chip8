@@ -1,9 +1,7 @@
 #include <fstream>
 #include "game.h"
 
-int error_code = 0, key = 0;
-char charactor = 0;
-std::ostringstream oss;
+int error_code = 0;
 Chip8 chip8;
 
 int initialize(char *filename)
@@ -32,15 +30,7 @@ void run()
 	while (!WindowShouldClose())
 	{
 		update_key_state();
-
-		if (key != 0 || charactor != 0)
-		{
-			chip8.emulate_one_cycle();
-			oss.clear();
-			oss.str("");
-			oss << "key is: " << key << ", char is: " << charactor;
-		}
-
+		update_execution();
 		update_display();
 	}
 }
@@ -86,14 +76,39 @@ void update_key_state()
 	}
 }
 
+void update_execution()
+{
+	chip8.emulate_one_cycle();
+	if (chip8.waiting_for_key_press)
+	{
+		chip8.set_key(get_key_presss());
+	}
+}
+
 void update_display()
 {
 	// we have to update the screen at 60hz, since system expects atleast 60 frames per second
 	// we set target_fps as 60, have to deliver the 60 frames
 	BeginDrawing();
 	ClearBackground(BLACK);
-	DrawText(oss.str().c_str(), 50, 50, 20, WHITE);
 	EndDrawing();
+}
+
+int get_key_presss()
+{
+	int key = 0;
+	while(true)
+	{
+		key = GetKeyPressed();
+
+		for (word i = 0; i < KEYS; i++)
+		{
+			if (key == INPUT_KEYS[i])
+			{
+				return key;
+			}
+		}
+	}
 }
 
 std::ostringstream get_memory_as_str_stream()
