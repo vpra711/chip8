@@ -167,8 +167,14 @@ void Chip8::e_series()
 {
 	switch (opcode.kk)
 	{
-		case 0xE09E: break;
-		case 0xE0A1: break;
+		case 0xE09E: 
+			if(key_state[v[opcode.x]] == 1)
+				pc += 2;
+			break;
+		case 0xE0A1: 
+			if(key_state[v[opcode.x]] == 0)
+				pc += 2;
+			break;
 	}
 }
 
@@ -176,15 +182,27 @@ void Chip8::f_series()
 {
 	switch (opcode.kk)
 	{
-		case 0xF007: break;
+		case 0xF007:
+			v[opcode.x] = delay_timer;
+			break;
 		case 0xF00A: break;
-		case 0xF015: break;
-		case 0xF018: break;
-		case 0xF01E: break;
+		case 0xF015:
+			delay_timer = v[opcode.x];
+			break;
+		case 0xF018:
+			sound_timer = v[opcode.x];
+			break;
+		case 0xF01E:
+			i += v[opcode.x];
+			break;
 		case 0xF029: break;
 		case 0xF033: break;
-		case 0xF055: break;
-		case 0xF065: break;
+		case 0xF055:
+			memcpy(memory + i, v, opcode.x);
+			break;
+		case 0xF065:
+			memcpy(v, memory + i, opcode.x);
+			break;
 	}
 }
 
