@@ -45,134 +45,136 @@ void Chip8::clear_display()
 
 void Chip8::emulate_one_cycle()
 {
-	word opcode = (memory[pc] << 8) | memory[pc + 1];
-	int first_nibble_filter = opcode & 0xF000;
+	opcode = Opcode((memory[pc] << 8) | memory[pc + 1]);
+	word first_nibble_filter = opcode.data & 0xF000;
 
 	switch (first_nibble_filter)
 	{
-		case 0x0000:
-			zero_series(opcode);
+		case 0x0000: 
+			zero_series();
 			break;
 		case 0x1000:
 			// jump to location nnn (0x1nnn)
-			pc = opcode & 0x0FFF;
+			pc = opcode.nnn;
 			break;
 		case 0x2000: 
 			// call subroutine at nnn (0x2nnn)
 			stack[sp] = pc;
 			sp++;
-			pc = opcode & 0x0FFF;
+			pc = opcode.nnn;
 			break;
 		case 0x3000:
-			int x  = opcode & 0x0F00;
-			int kk = opcode & 0x00FF;
-			if (v[x] == kk)
+			if (v[opcode.x] == opcode.kk)
 				pc += 2;
 			break;
 		case 0x4000:
-			int x  = opcode & 0x0F00;
-			int kk = opcode & 0x00FF;
-			if (v[x] != kk)
+			if (v[opcode.x] != opcode.kk)
 				pc += 2;
 			break;
 		case 0x5000:
-			int x = opcode & 0x0F00;
-			int y = opcode & 0x00F0;
-			if (v[x] == v[y])
+			if (v[opcode.x] == v[opcode.y])
 				pc += 2;
 			break;
 		case 0x6000:
-			int x = opcode & 0x0F00;
-			int kk = opcode & 0x00FF;
-			v[x] = kk;
+			v[opcode.x] = opcode.kk;
 			break;
 		case 0x7000:
-			int x = opcode & 0x0F00;
-			int kk = opcode & 0x00FF;
-			v[x] += kk;
+			v[opcode.x] += opcode.kk;
 			break;
 		case 0x8000:
-			eight_series(opcode);
+			eight_series();
 			break;
 		case 0x9000:
-			int x = opcode & 0x0F00;
-			int y = opcode & 0x00F0;
-			if (v[x] != v[y])
+			if (v[opcode.x] != v[opcode.y])
 				pc += 2;
 			break;
 		case 0xA000:
-			i = opcode & 0x0FFF;
+			i = opcode.nnn;
 			break;
 		case 0xB000: 
-			pc = (opcode & 0x0FFF) + v[0];
+			pc = opcode.nnn + v[0];
 			break;
 		case 0xC000:
-			int r = rand() % 256;
-			v[x] = r & (opcode & 0x00FF);
+			v[opcode.x] = (rand() % 256) & opcode.kk;
 			break;
 		case 0xD000: break;
 		case 0xE000:
-			e_series(opcode);
+			e_series();
 			break;
 		case 0xF000:
-			f_series(opcode);
+			f_series();
 			break;
 	}
 }
 
-void Chip8::zero_series(word opcode)
+void Chip8::zero_series()
 {
-	if (opcode == 0x00E0)
+	if (opcode.data == 0x00E0)
 	{
 		clear_display();
 	} 
-	else if (opcode == 0x00EE)
+	else if (opcode.data == 0x00EE)
 	{
 		// return from subroutine
 		pc = stack[sp];
 		sp--;
 	}
-	else
-	{
-		// jump to addr nnn in 0x0nnn
-		pc = (opcode & 0x0FFF);
-	}
 }
 
-void Chip8::eight_series(word opcode)
+void Chip8::eight_series()
 {
-	int filter_last_nibble = opcode & 0x000F;
+	word filter_last_nibble = opcode.data & 0xF00F;
+	word f = 0xF;
 
 	switch (filter_last_nibble)
 	{
-		case 0x8000: break;
-		case 0x8001: break;
-		case 0x8002: break;
-		case 0x8003: break;
-		case 0x8004: break;
-		case 0x8005: break;
-		case 0x8006: break;
-		case 0x8007: break;
-		case 0x800E: break;
+		case 0x8000:
+			v[opcode.x] = v[opcode.y];
+			break;
+		case 0x8001:
+			v[opcode.x] |= v[opcode.y];
+			break;
+		case 0x8002:
+			v[opcode.x] &= v[opcode.y];
+			break;
+		case 0x8003:
+			v[opcode.x] ^= v[opcode.y];
+			break;
+		case 0x8004: 
+			v[f] = ((v[opcode.x] + v[opcode.y]) > 255);
+			v[opcode.x] += v[opcode.y];
+			break;
+		case 0x8005:
+			v[f] = (v[opcode.x] > v[opcode.y]);
+			v[opcode.x] -= v[opcode.y];
+			break;
+		case 0x8006:
+			v[f] =  (v[opcode.x] & 0x1); // checking for lsb bit
+			v[opcode.x] >>= 1;
+			break;
+		case 0x8007:
+			v[f] = (v[opcode.y] > v[opcode.x]);
+			v[opcode.x] = v[opcode.y] - v[opcode.x];
+			break;
+		case 0x800E:
+			v[f] = (v[opcode.x] & 0x80); // checking for msb bit
+			v[opcode.x] <<= 1;
+			break;
 	}
 }
 
-void Chip8::e_series(word opcode)
+void Chip8::e_series()
 {
-	int filter_last_2_nibble = opcode & 0x00FF;
-
-	switch (filter_last_2_nibble)
+	switch (opcode.kk)
 	{
 		case 0xE09E: break;
 		case 0xE0A1: break;
 	}
 }
 
-void Chip8::f_series(word opcode)
+void Chip8::f_series()
 {
-	int filter_last_2_nibble = opcode & 0x00FF;
-
-	switch (filter_last_2_nibble)
+	switch (opcode.kk)
 	{
 		case 0xF007: break;
 		case 0xF00A: break;
@@ -184,4 +186,22 @@ void Chip8::f_series(word opcode)
 		case 0xF055: break;
 		case 0xF065: break;
 	}
+}
+
+Opcode::Opcode()
+{
+	data = 0;
+	x 	 = 0;
+	y 	 = 0;
+	kk 	 = 0;
+	nnn  = 0;
+}
+
+Opcode::Opcode(word instruction)
+{
+	data = instruction;
+	x 	 = (data & 0x0F00) >> 8;
+	y	 = (data & 0x00F0) >> 4;
+	kk 	 = data & 0x00FF;
+	nnn  = nnn;
 }

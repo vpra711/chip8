@@ -30,6 +30,18 @@ constexpr byte chip8_fontset[FONTSET_SIZE] =
 	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
+struct Opcode
+{
+	word 	data;
+	word 	x;
+	word 	y;
+	word 	kk;
+	word 	nnn;
+
+	Opcode();
+	Opcode(word instruction);
+};
+
 struct Chip8
 {
 	private:
@@ -56,8 +68,9 @@ struct Chip8
 	byte sound_timer;
 
 
-	// opcode, 2 bytes
-	word opcode;
+	// opcode, usually 2 bytes, but will expand, 
+	// word opcode;
+	Opcode opcode;
 
 	// system call stack
 	// 16 level - each 16 bit
@@ -75,10 +88,10 @@ struct Chip8
 
 	private:
 	void clear_display();
-	void zero_series(word opcode);
-	void eight_series(word opcode);
-	void e_series(word opcode);
-	void f_series(word opcode);
+	void zero_series();
+	void eight_series();
+	void e_series();
+	void f_series();
 
 	public:
 	Chip8();
