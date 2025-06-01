@@ -6,7 +6,7 @@ Chip8 chip8;
 
 int initialize(char *filename)
 {
-	InitWindow(DISPLAY_WIDTH, DISPLAY_HEIGHT, TITLE);
+	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE);
 	SetTargetFPS(60);
 
 	std::vector<byte> buffer = load_file_into_buffer(filename);

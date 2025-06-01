@@ -3,12 +3,14 @@
 typedef unsigned char byte;
 typedef unsigned short word;
 
-constexpr int MEMORY_SIZE 	= 4 * 1024;
-constexpr int DISPLAY_SIZE 	= 64 * 32;
-constexpr int FONTSET_SIZE 	= 80;
-constexpr int STACK_SIZE 	= 16;
-constexpr int REGISTERS 	= 16;
-constexpr int KEYS 			= 16;
+constexpr int MEMORY_SIZE 		= 4 * 1024;
+constexpr int DISPLAY_HEIGHT	= 32;
+constexpr int DISPLAY_WIDTH 	= 64;
+constexpr int FONTSET_SIZE 		= 80;
+constexpr int STACK_SIZE 		= 16;
+constexpr int REGISTERS 		= 16;
+constexpr int KEYS 				= 16;
+constexpr byte f 				= 0xF;
 
 constexpr byte chip8_fontset[FONTSET_SIZE] =
 {
@@ -54,7 +56,7 @@ struct Chip8
 	byte v[REGISTERS];
 
 	// memory address register (index register), 0x0 ... 0xFFF
-	word i;
+	word I;
 	
 	// program counter, 0x0 ... 0xFFF
 	word pc;
@@ -80,7 +82,7 @@ struct Chip8
 	
 	public:
 	// windows size 64 * 32 => 2048
-	byte display[DISPLAY_SIZE];
+	byte display[DISPLAY_WIDTH][DISPLAY_HEIGHT];
 	
 	// keyboard - 0x0 ... 0xF
 	byte key_state[KEYS];
@@ -94,8 +96,9 @@ struct Chip8
 	void eight_series();
 	void e_series();
 	void f_series();
+	void update_diplay_memory();
 
-	public:
+	public : 
 	Chip8();
 
 	void load(std::vector<byte> buffer);

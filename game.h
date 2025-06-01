@@ -5,8 +5,8 @@
 #include "raylib.h"
 #include "chip8.h"
 
-constexpr int DISPLAY_WIDTH = 640;
-constexpr int DISPLAY_HEIGHT = 320;
+constexpr int WINDOW_WIDTH = 640;
+constexpr int WINDOW_HEIGHT = 320;
 constexpr int PIXAL_SIZE = 10;
 constexpr char *TITLE = "chip8 emulator";
 
@@ -31,3 +31,4 @@ void update_execution();
 void update_display();
 std::ostringstream get_memory_as_str_stream();
 void handle_error_code(int error_code);
+int get_key_presss();
