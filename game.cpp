@@ -91,6 +91,20 @@ void update_display()
 	// we set target_fps as 60, have to deliver the 60 frames
 	BeginDrawing();
 	ClearBackground(BLACK);
+	for (byte x = 0; x < DISPLAY_WIDTH; x++) 
+	{
+		for (byte y = 0; y < DISPLAY_HEIGHT; y++)
+		{
+			if (chip8.display[x][y] == 1)
+			{
+				DrawRectangle(x * PIXAL_SIZE + PIXAL_SIZE, y * PIXAL_SIZE + PIXAL_SIZE, PIXAL_SIZE, PIXAL_SIZE, BROWN);
+			}
+			else
+			{
+				DrawRectangle(x * PIXAL_SIZE + PIXAL_SIZE, y * PIXAL_SIZE + PIXAL_SIZE, PIXAL_SIZE, PIXAL_SIZE, GRAY);
+			}
+		}
+	}
 	EndDrawing();
 }
 
