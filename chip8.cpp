@@ -248,8 +248,8 @@ void Chip8::update_diplay_memory()
 		for (byte bi = 0; bi < 8; bi++)
 		{
 			byte bit = (memory_byte >> (7 - bi)) & 0x1;
-			byte x = (v[opcode.x] + mi) % 64;
-			byte y = (v[opcode.y] + bi) % 32;
+			byte x = (v[opcode.x] + bi) % 64;
+			byte y = (v[opcode.y] + mi) % 32;
 			display[x][y] ^= bit;
 
 			if (bit == 1 && display[x][y] == 0)

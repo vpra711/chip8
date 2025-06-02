@@ -5,8 +5,8 @@
 #include "raylib.h"
 #include "chip8.h"
 
-constexpr int WINDOW_WIDTH = 1280;
-constexpr int WINDOW_HEIGHT = 720;
+constexpr int WINDOW_WIDTH = 800;
+constexpr int WINDOW_HEIGHT = 600;
 constexpr int PIXAL_SIZE = 10;
 constexpr char *TITLE = "chip8 emulator";
 
