@@ -61,15 +61,6 @@ struct Chip8
 	// program counter, 0x0 ... 0xFFF
 	word pc;
 
-
-	// 2 special purpose registers - delay and sound timers	
-	// delay timer 8 bit
-	byte delay_timer;
-
-	// sound timer 8 bit
-	byte sound_timer;
-
-
 	// opcode, usually 2 bytes, but will expand, 
 	// word opcode;
 	Opcode opcode;
@@ -81,6 +72,13 @@ struct Chip8
 
 	
 	public:
+	// 2 special purpose registers - delay and sound timers	
+	// delay timer 8 bit
+	byte delay_timer;
+
+	// sound timer 8 bit
+	byte sound_timer;
+
 	// windows size 64 * 32 => 2048
 	byte display[DISPLAY_WIDTH][DISPLAY_HEIGHT];
 	

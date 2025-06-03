@@ -1,12 +1,17 @@
+#include <chrono>
 #include <fstream>
+#include <raylib.h>
 #include "game.h"
 
 int error_code = 0;
 Chip8 chip8;
+Sound beep;
+chiptime last_time;
 
 int initialize(char *filename)
 {
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE);
+	InitAudioDevice();
 	SetTargetFPS(60);
 
 	std::vector<byte> buffer = load_file_into_buffer(filename);
@@ -16,6 +21,7 @@ int initialize(char *filename)
 		return 1;
 	}
 
+	beep = LoadSound(sound_file);
 	chip8.load(buffer);
 
 	// if (error_code)
@@ -23,12 +29,14 @@ int initialize(char *filename)
 	// 	handle_error_code(error_code);
 	// 	return 0;
 	// }
+	last_time = std::chrono::high_resolution_clock::now();
 }
 
 void run()
 {
 	while (!WindowShouldClose())
 	{
+		update_timers();
 		update_key_state();
 		update_execution();
 		update_display();
@@ -37,6 +45,8 @@ void run()
 
 void close()
 {
+	UnloadSound(beep);
+	CloseAudioDevice();
 	CloseWindow();
 }
 
@@ -106,6 +116,23 @@ void update_display()
 		}
 	}
 	EndDrawing();
+
+	if (!IsSoundPlaying(beep) && chip8.sound_timer > 0)
+	{
+		PlaySound(beep);
+	}
+}
+
+void update_timers()
+{
+	chiptime end_time = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = end_time - last_time;
+
+	if (elapsed.count() >= TIME_INTERVAL) {
+		if (chip8.delay_timer > 0) chip8.delay_timer--;
+		if (chip8.sound_timer > 0) chip8.sound_timer--;
+		last_time = end_time;
+	}
 }
 
 int get_key_presss()

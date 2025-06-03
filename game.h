@@ -2,13 +2,18 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <chrono>
 #include "raylib.h"
 #include "chip8.h"
+
+typedef std::chrono::time_point<std::chrono::high_resolution_clock> chiptime;
 
 constexpr int WINDOW_WIDTH = 800;
 constexpr int WINDOW_HEIGHT = 600;
 constexpr int PIXAL_SIZE = 10;
 constexpr char *TITLE = "chip8 emulator";
+constexpr char *sound_file = "tests/beep.mp3";
+constexpr float TIME_INTERVAL = 1.0 / 60.0; // 60hz
 
 constexpr int INPUT_KEYS[16] =
 {
@@ -32,3 +37,4 @@ void update_display();
 std::ostringstream get_memory_as_str_stream();
 void handle_error_code(int error_code);
 int get_key_presss();
+void update_timers();

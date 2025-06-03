@@ -48,10 +48,9 @@ void Chip8::clear_display()
 void Chip8::emulate_one_cycle()
 {
 	opcode = Opcode((memory[pc] << 8) | memory[pc + 1]);
-	word first_nibble_filter = opcode.data & 0xF000;
 	is_pc_modified = false;
 
-	switch (first_nibble_filter)
+	switch (opcode.data & 0xF000)
 	{
 		case 0x0000:
 			zero_series();
@@ -137,9 +136,7 @@ void Chip8::zero_series()
 
 void Chip8::eight_series()
 {
-	word filter_last_nibble = opcode.data & 0xF00F;
-
-	switch (filter_last_nibble)
+	switch (opcode.data & 0xF00F)
 	{
 		case 0x8000:
 			v[opcode.x] = v[opcode.y];
@@ -178,7 +175,7 @@ void Chip8::eight_series()
 
 void Chip8::e_series()
 {
-	switch (opcode.kk)
+	switch (opcode.data && 0xF0FF)
 	{
 		case 0xE09E: 
 			if(key_state[v[opcode.x]] == 1)
@@ -193,7 +190,7 @@ void Chip8::e_series()
 
 void Chip8::f_series()
 {
-	switch (opcode.kk)
+	switch (opcode.data & 0xF0FF)
 	{
 		case 0xF007:
 			v[opcode.x] = delay_timer;
