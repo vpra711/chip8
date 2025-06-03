@@ -1,12 +1,14 @@
-A simple emulation project: chip8
-	https://multigesture.net/wp-content/uploads/mirror/goldroad/chip8.shtml
+## CHIP-8 Interpreter
+Chip-8 is a lightweight virtual machine, which can execute chip8 binaries. It has 34 instructions, 16-level stack and a memory of 4 kb. you can find other details in the reference section.
 
-how to write a interpreter
-	https://multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
+## screenshot
+![ibm image](./images/ibm_logo.png)
 
-chip8 techical reference
-	http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
+### References
+- [A simple emulation project: chip8](https://multigesture.net/wp-content/uploads/mirror/goldroad/chip8.shtml)
 
-some test suites
-	https://github.com/Timendus/chip8-test-suite
+- [how to write a interpreter](https://multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/)
 
+- [chip8 techical reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
+
+- [some test suites](https://github.com/Timendus/chip8-test-suite)
