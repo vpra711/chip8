@@ -1,6 +1,3 @@
-#include <chrono>
-#include <fstream>
-#include <raylib.h>
 #include "game.h"
 
 int error_code = 0;
@@ -8,7 +5,7 @@ Chip8 chip8;
 Sound beep;
 chiptime last_time;
 
-int initialize(char *filename)
+Error initialize(char *filename)
 {
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE);
 	InitAudioDevice();
@@ -18,7 +15,7 @@ int initialize(char *filename)
 
 	if(buffer.empty())
 	{
-		return 1;
+		return buffer_empty;
 	}
 
 	beep = LoadSound(sound_file);
@@ -30,6 +27,7 @@ int initialize(char *filename)
 	// 	return 0;
 	// }
 	last_time = std::chrono::high_resolution_clock::now();
+	return none;
 }
 
 void run()
@@ -149,52 +147,5 @@ int get_key_presss()
 				return key;
 			}
 		}
-	}
-}
-
-std::ostringstream get_memory_as_str_stream()
-{
-	// std::ostringstream output_buffer;
-	// output_buffer << "\n";
-
-	// for (int i = 0; i < MEMORY_SIZE; i++)
-	// {
-	// 	if (i % 8 == 0)
-	// 	{
-	// 		output_buffer << "\n";
-	// 	}
-
-	// 	output_buffer << chip8.memory[i] << "\t";
-	// }
-
-	// return output_buffer;
-}
-
-void handle_error_code(int error_code)
-{
-	std::string error_message;
-	switch (error_code)
-	{
-		case 1:
-		error_message = "unable to open file";
-		break;
-		case 2:
-		error_message = "file is empty";
-		break;
-		case 3:
-		error_message = "unable to read";
-		break;
-		case 4:
-		error_message = "end of file detected";
-		break;
-		case 5:
-		error_message = "bad file";
-		break;
-		case 6:
-		error_message = "fail bit is set";
-		break;
-		default:
-		error_message = "unknown error";
-		break;
 	}
 }

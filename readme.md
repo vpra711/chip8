@@ -12,3 +12,24 @@ Chip-8 is a lightweight virtual machine, which can execute chip8 binaries. It ha
 - [chip8 techical reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)
 
 - [some test suites](https://github.com/Timendus/chip8-test-suite)
+
+// --- core operations ---
+// window initialization - done
+// audio initializaiton - done
+// instruction & operation - done
+// does all instructions working as expected -  need to check
+// display update - done
+// audio update - done
+
+// key inputs - need to check
+
+// test on mac - working
+// test on windows - not working
+// test on linux - not working
+
+// error handling - yet to do
+// unit testing - yet to do
+
+// road-map
+// follow up in android and iOS using flutter
+// in web using java script
