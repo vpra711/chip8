@@ -1,5 +1,3 @@
-#include <vector>
-#include <time.h>
 #include "chip8.h"
 
 bool is_pc_modified = false;
@@ -16,10 +14,19 @@ Chip8::Chip8()
 	srand(time(0));
 }
 
-void Chip8::load(std::vector<byte> buffer)
+CHIP8_RESULT Chip8::load(std::vector<byte> buffer)
 {
 	// game starts at memory 0x200 (512 in memory)
-	std::copy(buffer.begin(), buffer.end(), memory + 0x200);
+	auto it = std::copy(buffer.begin(), buffer.end(), memory + 0x200);
+
+	if (std::distance(memory + 0x200, it) == buffer.size())
+	{
+		return copy_memory_buffer_success;
+	}
+	else
+	{
+		return copy_memory_buffer_error;
+	}
 }
 
 void Chip8::reset()
@@ -30,7 +37,7 @@ void Chip8::reset()
 	delay_timer = 0;
 	sound_timer = 0;
 	pc          = 0x200;
-	
+
 	memset(memory,    0, MEMORY_SIZE 					);
 	memset(stack,     0, STACK_SIZE  					);
 	memset(v,         0, REGISTERS   					);
@@ -151,23 +158,23 @@ void Chip8::eight_series()
 			v[opcode.x] ^= v[opcode.y];
 			break;
 		case 0x8004: 
-			v[f] = ((v[opcode.x] + v[opcode.y]) > 255);
+			v[F] = ((v[opcode.x] + v[opcode.y]) > 255);
 			v[opcode.x] += v[opcode.y];
 			break;
 		case 0x8005:
-			v[f] = (v[opcode.x] > v[opcode.y]);
+			v[F] = (v[opcode.x] > v[opcode.y]);
 			v[opcode.x] -= v[opcode.y];
 			break;
 		case 0x8006:
-			v[f] =  (v[opcode.x] & 0x1); // checking for lsb bit
+			v[F] =  (v[opcode.x] & 0x1); // checking for lsb bit
 			v[opcode.x] >>= 1;
 			break;
 		case 0x8007:
-			v[f] = (v[opcode.y] > v[opcode.x]);
+			v[F] = (v[opcode.y] > v[opcode.x]);
 			v[opcode.x] = v[opcode.y] - v[opcode.x];
 			break;
 		case 0x800E:
-			v[f] = (v[opcode.x] & 0x80); // checking for msb bit
+			v[F] = (v[opcode.x] & 0x80); // checking for msb bit
 			v[opcode.x] <<= 1;
 			break;
 	}
@@ -175,7 +182,7 @@ void Chip8::eight_series()
 
 void Chip8::e_series()
 {
-	switch (opcode.data && 0xF0FF)
+	switch (opcode.data & 0xF0FF)
 	{
 		case 0xE09E: 
 			if(key_state[v[opcode.x]] == 1)
@@ -234,7 +241,7 @@ void Chip8::update_diplay_memory()
 {
 	// no of bytes to be read
 	byte n = opcode.data & 0x000F;
-	v[f] = 0;
+	v[F] = 0;
 
 	// mi is memory index
 	for (byte mi = 0; mi < n; mi++)
@@ -251,7 +258,7 @@ void Chip8::update_diplay_memory()
 
 			if (bit == 1 && display[x][y] == 0)
 			{
-				v[f] = 1;
+				v[F] = 1;
 			}
 		}
 	}
