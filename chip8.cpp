@@ -39,7 +39,7 @@ void Chip8::reset()
 	pc          = 0x200;
 
 	memset(memory,    0, MEMORY_SIZE 					);
-	memset(stack,     0, STACK_SIZE  					);
+	memset(stack,     0, STACK_SIZE * sizeof(word)		);
 	memset(v,         0, REGISTERS   					);
 	memset(display,   0, DISPLAY_HEIGHT * DISPLAY_WIDTH );
 	memset(key_state, 0, KEYS        					);

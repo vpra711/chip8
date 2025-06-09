@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <memory.h>
 
 typedef unsigned char byte;
 typedef unsigned short word;
