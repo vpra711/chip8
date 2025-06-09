@@ -2,7 +2,9 @@
 Chip-8 is a lightweight virtual machine, which can execute chip8 binaries. It has 34 instructions, 16-level stack and a memory of 4 kb. you can find other details in the reference section.
 
 ## screenshot
+### windows
 ![ibm image](./images/ibm_logo.png)
+### mac os
 ![ibm image](./images/ibm_logo_mac.png)
 
 ### References
@@ -19,7 +21,7 @@ Chip-8 is a lightweight virtual machine, which can execute chip8 binaries. It ha
 - use gdb for windows in MIMode
 - use lldb for macos in MIMode
 
-## --- core operations ---
+## core operations
 - window initialization - done
 - audio initializaiton - done
 - instruction & operation - done
