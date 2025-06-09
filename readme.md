@@ -3,6 +3,7 @@ Chip-8 is a lightweight virtual machine, which can execute chip8 binaries. It ha
 
 ## screenshot
 ![ibm image](./images/ibm_logo.png)
+![ibm image](./images/ibm_logo_mac.png)
 
 ### References
 - [A simple emulation project: chip8](https://multigesture.net/wp-content/uploads/mirror/goldroad/chip8.shtml)
@@ -13,23 +14,28 @@ Chip-8 is a lightweight virtual machine, which can execute chip8 binaries. It ha
 
 - [some test suites](https://github.com/Timendus/chip8-test-suite)
 
-// --- core operations ---
-// window initialization - done
-// audio initializaiton - done
-// instruction & operation - done
-// does all instructions working as expected -  need to check
-// display update - done
-// audio update - done
+## operations
 
-// key inputs - need to check
+- use gdb for windows in MIMode
+- use lldb for macos in MIMode
 
-// test on mac - working
-// test on windows - not working
-// test on linux - not working
+## --- core operations ---
+- window initialization - done
+- audio initializaiton - done
+- instruction & operation - done
+- does all instructions working as expected -  need to check
+- display update - done
+- audio update - done
 
-// error handling - yet to do
-// unit testing - yet to do
+- key inputs - need to check
 
-// road-map
-// follow up in android and iOS using flutter
-// in web using java script
+- test on mac - working
+- test on windows - working
+- test on linux - not working
+
+- error handling - yet to do
+- unit testing - yet to do
+
+- road-map
+- follow up in android and iOS using flutter
+- in web using java script
