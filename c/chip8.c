@@ -8,10 +8,12 @@
 
 #define MEMORY_SIZE (4 * 1024)
 #define DATA_REGISTER_SIZE 16
-#define SCREEN_SIZE (64 * 32)
+#define SCREEN_HEIGHT 32
+#define SCREEN_WIDTH 64
 #define STACK_SIZE 16
 #define F 0xF
 #define FONTSET_SIZE (5 * 16)
+#define PIXEL_SIZE 10
 
 typedef uint8_t byte;
 typedef uint16_t word;
@@ -21,22 +23,24 @@ const char* PROGRAM_NAME = "CHIP-8 VM";
 const int DISPLAY_HEIGHT = 600;
 const int DISPLAY_WIDTH = 800;
 
-byte memory[MEMORY_SIZE];
 // data registers
-byte v[DATA_REGISTER_SIZE];
+byte regter[DATA_REGISTER_SIZE];
+
 //address register or index
-word i;
-word pc;
+word addr;
+
+word program_counter = 0x200;
+byte memory[MEMORY_SIZE];
+byte screen[SCREEN_WIDTH][SCREEN_HEIGHT];
 
 byte delay_timer;
 byte sound_timer;
 
-byte screen[SCREEN_SIZE];
 
 word stack[STACK_SIZE];
-byte sp;
+byte stack_pointer;
 
-byte x, y, n, nn, nnn;
+byte data_x, data_y, data_n, data_nn, data_nnn;
 
 const byte chip8_fontset[FONTSET_SIZE] =
 {
@@ -58,168 +62,192 @@ const byte chip8_fontset[FONTSET_SIZE] =
 	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-void draw(int x, int y, int n) {
-
-}
-
 void operation_0xxx(word opcode) {
     if (opcode == 0x00E0) {
-        memset(screen, 0, SCREEN_SIZE);
+        memset(screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
     } else if (opcode == 0x00EE) {
-        pc = stack[sp--];
+        program_counter = stack[stack_pointer--];
+        program_counter -= 2;
     } else {
-        stack[sp++] = pc;
-        pc = memory[opcode & 0x0FFF];
+        stack[stack_pointer++] = program_counter;
+        program_counter = data_nnn;
+        // will increase the program counter after dispatch.
+        program_counter -= 2;
     }
 }
 
 void operation_1xxx(word opcode) {
-    pc = memory[opcode & 0x0FFF];
+    program_counter = data_nnn;
+    // will increase the program counter after dispatch.
+    program_counter -= 2;
 }
 
 void operation_2xxx(word opcode) {
-    stack[sp++] = pc;
-    pc = memory[opcode & 0x0FFF];
+    stack[stack_pointer++] = program_counter;
+    program_counter = data_nnn;
+    // will increase the program counter after dispatch.
+    program_counter -= 2;
 }
 
 void operation_3xxx(word opcode) {
-    if (v[x] == nn) {
-        pc += 2;
+    if (regter[data_x] == data_nn) {
+        program_counter += 2;
     }
 }
 
 void operation_4xxx(word opcode) {
-    if (v[x] != nn) {
-        pc += 2;
+    if (regter[data_x] != data_nn) {
+        program_counter += 2;
     }
 }
 
 void operation_5xxx(word opcode) {
-    if (v[x] == v[y]) {
-        pc += 2;
+    if (regter[data_x] == regter[data_y]) {
+        program_counter += 2;
     }
 }
 
 void operation_6xxx(word opcode) {
-    v[x] = nn;
+    regter[data_x] = data_nn;
 }
 
 void operation_7xxx(word opcode) {
-    v[x] += nn;
+    regter[data_x] += data_nn;
 }
 
 void operation_8xxx(word opcode) {
-    switch (n) {
+    switch (data_n) {
         case 0:
-            v[x] = v[y];
+            regter[data_x] = regter[data_y];
             break;
         case 1:
-            v[x] = v[x] | v[y];
+            regter[data_x] |= regter[data_y];
             break;
         case 2:
-            v[x] = v[x] & v[y];
+            regter[data_x] &= regter[data_y];
             break;
         case 3:
-            v[x] = v[x] ^ v[y];
+            regter[data_x] ^= regter[data_y];
             break;
         case 4:
-            v[F] = (v[x] + v[y]) > 255;
-            v[x] += v[y];
+            regter[F] = (regter[data_x] + regter[data_y]) > 255;
+            regter[data_x] += regter[data_y];
             break;
         case 5:
-            v[F] = v[x] >= v[y];
-            v[x] -= v[y];
+            regter[F] = regter[data_x] >= regter[data_y];
+            regter[data_x] -= regter[data_y];
             break;
         case 6:
-            v[F] = v[x] & 1;
-            v[x] >>= 1;
+            regter[F] = regter[data_x] & 1;
+            regter[data_x] >>= 1;
             break;
         case 7:
-            v[F] = v[y] >= v[x];
-            v[x] = v[y] - v[x];
+            regter[F] = regter[data_y] >= regter[data_x];
+            regter[data_x] = regter[data_y] - regter[data_x];
             break;
         case 0xE:
-            v[F] = v[x] & 0x80;
-            v[x] <<= 1;
+            regter[F] = regter[data_x] & 0x80;
+            regter[data_x] <<= 1;
             break;
         default:
-            fprintf(stdout, "invalid operation 8-series. opcode: %d, operation: %d", opcode, n);
+            fprintf(stdout, "invalid operation 8-series. opcode: %d, operation: %d\n", opcode, data_n);
     }
 }
 
 void operation_9xxx(word opcode) {
-    if (v[x] != v[y]) {
-        pc += 2;
+    if (regter[data_x] != regter[data_y]) {
+        program_counter += 2;
     }
 }
 
 void operation_axxx(word opcode) {
-    i = opcode & 0x0FFF;
+    addr = data_nnn;
 }
 
 void operation_bxxx(word opcode) {
-    pc = (opcode & 0x0FFF) + v[0];
+    program_counter = data_nnn + regter[0];
+    program_counter -= 2;
 }
 
 void operation_cxxx(word opcode) {
-    v[x] = rand() & nn;
+    regter[data_x] = (rand() % 256) & data_nn;
 }
 
 void operation_dxxx(word opcode) {
-    draw(v[x], v[y], n);
+	regter[F] = 0;
+
+	// mi - memory index
+	for (byte mi = 0; mi < data_n; mi++)
+	{
+		// n bytes from address in memory
+		byte memory_byte = memory[addr + mi];
+
+		for (byte bi = 0; bi < 8; bi++)
+		{
+			byte bit = (memory_byte >> (7 - bi)) & 0x1;
+			byte x = (regter[data_x] + bi) % 64;
+			byte y = (regter[data_y] + mi) % 32;
+			screen[x][y] ^= bit;
+
+			if (bit == 1 && screen[x][y] == 0)
+			{
+				regter[F] = 1;
+			}
+		}
+	}
 }
 
 void operation_exxx(word opcode) {
     word operation = opcode & 0xF0FF;
     if (operation == 0xE09E) {
-        if(IsKeyDown(v[x])) {
-            pc += 2;
+        if(IsKeyDown(regter[data_x])) {
+            program_counter += 2;
         }
     } else if (operation == 0xE0A1) {
-        if (IsKeyUp(v[x])) {
-            pc += 2;
+        if (IsKeyUp(regter[data_x])) {
+            program_counter += 2;
         }
     } else {
-        fprintf(stdout, "invalid operation e-series. opcode: %d, operation: %d", opcode, operation);
+        fprintf(stdout, "invalid operation e-series. opcode: %d, operation: %d\n", opcode, operation);
     }
 }
 
 void operation_fxxx(word opcode) {
-    switch (nn) {
+    switch (data_nn) {
         case 0x07:
-            v[x] = delay_timer;
+            regter[data_x] = delay_timer;
             break;
         case 0x0A:
-            while((v[x] = GetKeyPressed()) == 0);
+            while((regter[data_x] = GetKeyPressed()) == 0);
             break;
         case 0x15:
-            delay_timer = v[x];
+            delay_timer = regter[data_x];
             break;
         case 0x18:
-            sound_timer = v[x];
+            sound_timer = regter[data_x];
             break;
         case 0x1E:
-            i += v[x];
+            addr += regter[data_x];
             break;
         case 0x29:
             // each character is 5 bytes long.
             // fonts are stored in memory location
             // 0x000 to 0x01FF
-            i = v[x] * 5;
+            addr = regter[data_x] * 5;
             break;
         case 0x33:
-            memory[i] = v[x] / 100;
-            memory[i + 1] = (v[x] / 10) % 10;
-            memory[i + 2] = v[x] % 10;
+            memory[addr] = regter[data_x] / 100;
+            memory[addr + 1] = (regter[data_x] / 10) % 10;
+            memory[addr + 2] = regter[data_x] % 10;
             break;
         case 0x55:
-            memcpy(memory + i, v, x + 1);
+            memcpy(memory + addr, regter, data_x + 1);
             break;
         case 0x65:
-            memcpy(v, memory + i, x + 1);
+            memcpy(regter, memory + addr, data_x + 1);
             break;
         default:
-            fprintf(stdout, "invalid operation f-series. opcode: %d, operation: %d", opcode, nn);
+            fprintf(stdout, "invalid operation f-series. opcode: %d, operation: %d\n", opcode, data_nn);
     }
 }
 
@@ -243,12 +271,12 @@ handler dispatch_table[] = {
 };
 
 void emulate_one_cycle() {
-    word opcode = (memory[pc] << 8) | memory[pc + 1];
-    x = (opcode & 0x0F00) >> 8;
-    y = (opcode & 0x00F0) >> 4;
-    n = opcode & 0x000F;
-    nn = opcode & 0x00FF;
-    nnn = opcode & 0x0FFF;
+    word opcode = (memory[program_counter] << 8) | memory[program_counter + 1];
+    data_x = (opcode & 0x0F00) >> 8;
+    data_y = (opcode & 0x00F0) >> 4;
+    data_n = opcode & 0x000F;
+    data_nn = opcode & 0x00FF;
+    data_nnn = opcode & 0x0FFF;
 
     int operation = (opcode & 0xF000) >> 12;
     dispatch_table[operation](opcode);
@@ -262,6 +290,25 @@ void emulate_one_cycle() {
     if (sound_timer < 0) {
         sound_timer = 0;
     }
+
+    program_counter += 2;
+}
+
+void update_display() {
+    for (byte x = 0; x < SCREEN_WIDTH; x++)
+    {
+    	for (byte y = 0; y < SCREEN_HEIGHT; y++)
+    	{
+    		if (screen[x][y] == 1)
+    		{
+    			DrawRectangle(x * PIXEL_SIZE + PIXEL_SIZE, y * PIXEL_SIZE + PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, BROWN);
+    		}
+    		else
+    		{
+    			DrawRectangle(x * PIXEL_SIZE + PIXEL_SIZE, y * PIXEL_SIZE + PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, GRAY);
+    		}
+    	}
+    }
 }
 
 int main(int argc, char **argv)
@@ -271,16 +318,17 @@ int main(int argc, char **argv)
     fseek(game, 0, SEEK_END);
     int file_size = ftell(game);
     fseek(game, 0, SEEK_SET);
-    memcpy(memory + 0x200, game, file_size);
     memcpy(memory, chip8_fontset, FONTSET_SIZE);
+    fread(memory + program_counter, 1, file_size, game);
     InitWindow(DISPLAY_WIDTH, DISPLAY_HEIGHT, PROGRAM_NAME);
     SetTargetFPS(60);
     while(!WindowShouldClose()) {
         emulate_one_cycle();
-        usleep(16000);
         BeginDrawing();
-        ClearBackground((Color){});
+        ClearBackground(BLACK);
+        update_display();
         EndDrawing();
+        usleep(15000);
     }
     return 0;
 }
