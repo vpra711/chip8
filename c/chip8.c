@@ -12,7 +12,6 @@
 #define SCREEN_WIDTH 64
 #define STACK_SIZE 16
 #define F 0xF
-#define FONTSET_SIZE (5 * 16)
 #define PIXEL_SIZE 10
 
 typedef uint8_t byte;
@@ -21,7 +20,9 @@ typedef void (*handler)(word opcode);
 
 const char* PROGRAM_NAME = "CHIP-8 VM";
 const int DISPLAY_HEIGHT = 600;
-const int DISPLAY_WIDTH = 800;
+const int DISPLAY_WIDTH  = 800;
+const int KEYMAP_SIZE    = 16;
+const int FONTSET_SIZE   = 5 * 16;
 
 // data registers
 byte regter[DATA_REGISTER_SIZE];
@@ -40,10 +41,9 @@ byte sound_timer;
 word stack[STACK_SIZE];
 byte stack_pointer;
 
-byte data_x, data_y, data_n, data_nn, data_nnn;
+word data_x, data_y, data_n, data_nn, data_nnn;
 
-const byte chip8_fontset[FONTSET_SIZE] =
-{
+const byte chip8_fontset[] = {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
 	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -62,12 +62,30 @@ const byte chip8_fontset[FONTSET_SIZE] =
 	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
+const int keymap[] = {
+    KEY_X,     // 0
+    KEY_ONE,   // 1
+    KEY_TWO,   // 2
+    KEY_THREE, // 3
+    KEY_Q,     // 4
+    KEY_W,     // 5
+    KEY_E,     // 6
+    KEY_A,     // 7
+    KEY_S,     // 8
+    KEY_D,     // 9
+    KEY_Z,     // A
+    KEY_C,     // B
+    KEY_FOUR,  // C
+    KEY_R,     // D
+    KEY_F,     // E
+    KEY_V,     // F
+};
+
 void operation_0xxx(word opcode) {
     if (opcode == 0x00E0) {
         memset(screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
     } else if (opcode == 0x00EE) {
-        program_counter = stack[stack_pointer--];
-        program_counter -= 2;
+        program_counter = stack[--stack_pointer];
     } else {
         stack[stack_pointer++] = program_counter;
         program_counter = data_nnn;
@@ -146,7 +164,7 @@ void operation_8xxx(word opcode) {
             regter[data_x] = regter[data_y] - regter[data_x];
             break;
         case 0xE:
-            regter[F] = regter[data_x] & 0x80;
+            regter[F] = (regter[data_x] >> 7) & 1;
             regter[data_x] <<= 1;
             break;
         default:
@@ -200,11 +218,11 @@ void operation_dxxx(word opcode) {
 void operation_exxx(word opcode) {
     word operation = opcode & 0xF0FF;
     if (operation == 0xE09E) {
-        if(IsKeyDown(regter[data_x])) {
+        if(IsKeyDown(keymap[regter[data_x]])) {
             program_counter += 2;
         }
     } else if (operation == 0xE0A1) {
-        if (IsKeyUp(regter[data_x])) {
+        if (IsKeyUp(keymap[regter[data_x]])) {
             program_counter += 2;
         }
     } else {
@@ -218,7 +236,14 @@ void operation_fxxx(word opcode) {
             regter[data_x] = delay_timer;
             break;
         case 0x0A:
-            while((regter[data_x] = GetKeyPressed()) == 0);
+            while(true) {
+                for (int i = 0; i < KEYMAP_SIZE; i++) {
+                    if (!IsKeyDown(keymap[i]))
+                        continue;
+                    regter[data_x] = i;
+                    return;
+                }
+            }
             break;
         case 0x15:
             delay_timer = regter[data_x];
@@ -267,28 +292,26 @@ handler dispatch_table[] = {
     operation_cxxx,
     operation_dxxx,
     operation_exxx,
-    operation_fxxx,
+    operation_fxxx
 };
 
 void emulate_one_cycle() {
     word opcode = (memory[program_counter] << 8) | memory[program_counter + 1];
-    data_x = (opcode & 0x0F00) >> 8;
-    data_y = (opcode & 0x00F0) >> 4;
-    data_n = opcode & 0x000F;
-    data_nn = opcode & 0x00FF;
-    data_nnn = opcode & 0x0FFF;
+    data_x      = (opcode & 0x0F00) >> 8;
+    data_y      = (opcode & 0x00F0) >> 4;
+    data_n      = opcode & 0x000F;
+    data_nn     = opcode & 0x00FF;
+    data_nnn    = opcode & 0x0FFF;
 
     int operation = (opcode & 0xF000) >> 12;
     dispatch_table[operation](opcode);
 
-    delay_timer--;
-    if (delay_timer < 0) {
-        delay_timer = 0;
+    if (delay_timer > 0) {
+        delay_timer--;
     }
 
-    sound_timer--;
-    if (sound_timer < 0) {
-        sound_timer = 0;
+    if (sound_timer > 0) {
+        sound_timer--;
     }
 
     program_counter += 2;
@@ -314,7 +337,11 @@ void update_display() {
 int main(int argc, char **argv)
 {
     srand(time(0));
-    FILE *game = fopen("../tests/2-ibm-logo.ch8", "r");
+    FILE *game = fopen("../tests/1-chip8-logo.ch8", "rb");
+    if (!game) {
+        fprintf(stdout, "failed to open ROM\n");
+        return 1;
+    }
     fseek(game, 0, SEEK_END);
     int file_size = ftell(game);
     fseek(game, 0, SEEK_SET);
@@ -330,5 +357,6 @@ int main(int argc, char **argv)
         EndDrawing();
         usleep(15000);
     }
+    fclose(game);
     return 0;
 }
