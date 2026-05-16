@@ -5,6 +5,7 @@ Chip-8 is a lightweight virtual machine, which can execute chip8 binaries. It ha
 ### windows
 ![ibm image](./images/ibm_logo.png)
 ### mac os
+![chip8 logo](./images/chip8.png)
 ![ibm image](./images/ibm_logo_mac.png)
 
 ### References
