@@ -44,22 +44,22 @@ byte stack_pointer;
 word data_x, data_y, data_n, data_nn, data_nnn;
 
 const byte chip8_fontset[] = {
-	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-	0x20, 0x60, 0x20, 0x20, 0x70, // 1
-	0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-	0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-	0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-	0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-	0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-	0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-	0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-	0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-	0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-	0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-	0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-	0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-	0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-	0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
 const int keymap[] = {
@@ -192,27 +192,27 @@ void operation_cxxx(word opcode) {
 }
 
 void operation_dxxx(word opcode) {
-	regter[F] = 0;
+    regter[F] = 0;
 
-	// mi - memory index
-	for (byte mi = 0; mi < data_n; mi++)
-	{
-		// n bytes from address in memory
-		byte memory_byte = memory[addr + mi];
+    // mi - memory index
+    for (byte mi = 0; mi < data_n; mi++)
+    {
+        // n bytes from address in memory
+        byte memory_byte = memory[addr + mi];
 
-		for (byte bi = 0; bi < 8; bi++)
-		{
-			byte bit = (memory_byte >> (7 - bi)) & 0x1;
-			byte x = (regter[data_x] + bi) % 64;
-			byte y = (regter[data_y] + mi) % 32;
-			screen[x][y] ^= bit;
+        for (byte bi = 0; bi < 8; bi++)
+        {
+            byte bit = (memory_byte >> (7 - bi)) & 0x1;
+            byte x = (regter[data_x] + bi) % 64;
+            byte y = (regter[data_y] + mi) % 32;
+            screen[x][y] ^= bit;
 
-			if (bit == 1 && screen[x][y] == 0)
-			{
-				regter[F] = 1;
-			}
-		}
-	}
+            if (bit == 1 && screen[x][y] == 0)
+            {
+                regter[F] = 1;
+            }
+        }
+    }
 }
 
 void operation_exxx(word opcode) {
@@ -236,14 +236,13 @@ void operation_fxxx(word opcode) {
             regter[data_x] = delay_timer;
             break;
         case 0x0A:
-            while(true) {
-                for (int i = 0; i < KEYMAP_SIZE; i++) {
-                    if (!IsKeyDown(keymap[i]))
-                        continue;
-                    regter[data_x] = i;
-                    return;
-                }
+            for (int i = 0; i < KEYMAP_SIZE; i++) {
+                if (!IsKeyDown(keymap[i]))
+                    continue;
+                regter[data_x] = i;
+                return;
             }
+            program_counter -= 2;
             break;
         case 0x15:
             delay_timer = regter[data_x];
@@ -305,7 +304,27 @@ void emulate_one_cycle() {
 
     int operation = (opcode & 0xF000) >> 12;
     dispatch_table[operation](opcode);
+    program_counter += 2;
+}
 
+void update_display() {
+    for (byte x = 0; x < SCREEN_WIDTH; x++)
+    {
+        for (byte y = 0; y < SCREEN_HEIGHT; y++)
+        {
+            if (screen[x][y] == 1)
+            {
+                DrawRectangle(x * PIXEL_SIZE + PIXEL_SIZE, y * PIXEL_SIZE + PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, BROWN);
+            }
+            else
+            {
+                DrawRectangle(x * PIXEL_SIZE + PIXEL_SIZE, y * PIXEL_SIZE + PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, GRAY);
+            }
+        }
+    }
+}
+
+void update_timers(Sound beep) {
     if (delay_timer > 0) {
         delay_timer--;
     }
@@ -314,30 +333,16 @@ void emulate_one_cycle() {
         sound_timer--;
     }
 
-    program_counter += 2;
-}
-
-void update_display() {
-    for (byte x = 0; x < SCREEN_WIDTH; x++)
-    {
-    	for (byte y = 0; y < SCREEN_HEIGHT; y++)
-    	{
-    		if (screen[x][y] == 1)
-    		{
-    			DrawRectangle(x * PIXEL_SIZE + PIXEL_SIZE, y * PIXEL_SIZE + PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, BROWN);
-    		}
-    		else
-    		{
-    			DrawRectangle(x * PIXEL_SIZE + PIXEL_SIZE, y * PIXEL_SIZE + PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, GRAY);
-    		}
-    	}
+    if (sound_timer == 0 && !IsSoundPlaying(beep)) {
+        PlaySound(beep);
     }
 }
 
 int main(int argc, char **argv)
 {
     srand(time(0));
-    FILE *game = fopen("../tests/1-chip8-logo.ch8", "rb");
+
+    FILE *game = fopen("../tests/6-keypad.ch8", "rb");
     if (!game) {
         fprintf(stdout, "failed to open ROM\n");
         return 1;
@@ -347,16 +352,27 @@ int main(int argc, char **argv)
     fseek(game, 0, SEEK_SET);
     memcpy(memory, chip8_fontset, FONTSET_SIZE);
     fread(memory + program_counter, 1, file_size, game);
+
     InitWindow(DISPLAY_WIDTH, DISPLAY_HEIGHT, PROGRAM_NAME);
+    InitAudioDevice();
+    Sound beep = LoadSound("../tests/beep.mp3");
     SetTargetFPS(60);
+
     while(!WindowShouldClose()) {
+        clock_t start_time = clock();
         emulate_one_cycle();
         BeginDrawing();
         ClearBackground(BLACK);
         update_display();
         EndDrawing();
-        usleep(15000);
+        update_timers(beep);
+        usleep(16667);
+        clock_t end_time = clock();
+        printf("start_time: %ld, end_time: %ld, diff: %ld, clock per milisecond: %ld\n", start_time, end_time, end_time - start_time, (end_time - start_time) / (CLOCKS_PER_SEC / 1000));
     }
+
+    UnloadSound(beep);
+    CloseAudioDevice();
     fclose(game);
     return 0;
 }
