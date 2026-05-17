@@ -242,6 +242,8 @@ void operation_fxxx(word opcode) {
                 regter[data_x] = i;
                 return;
             }
+            // by doing so, we're handing over waiting
+            // loop control to game loop
             program_counter -= 2;
             break;
         case 0x15:
